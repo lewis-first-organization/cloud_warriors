@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libralinks - Online Library Database System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Softer, light background */
+            color: #2d3748; /* Darker text for readability */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0; /* Light gray for track */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8; /* Medium gray for thumb */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; /* Darker gray on hover */
+        }
+
+        /* Modal specific styles for animation */
+        .modal {
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+            opacity: 0;
+            visibility: hidden;
+        }
+        .modal.is-active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            transform: translateY(-20px); /* Subtle slide in */
+            opacity: 0;
+        }
+        .modal.is-active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-5 shadow-xl sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
+            <h1 class="text-3xl lg:text-4xl font-extrabold mb-2 md:mb-0 tracking-wide">Libralinks</h1>
+            <nav>
+                <ul class="flex space-x-4 sm:space-x-6">
+                    <li><a href="#" class="nav-link text-lg hover:text-blue-200 transition duration-300 transform hover:scale-105" data-modal-target="summary-modal">Summary</a></li>
+                    <li><a href="#" class="nav-link text-lg hover:text-blue-200 transition duration-300 transform hover:scale-105" data-modal-target="features-modal">Features</a></li>
+                    <li><a href="#" class="nav-link text-lg hover:text-blue-200 transition duration-300 transform hover:scale-105" data-modal-target="team-modal">Team</a></li>
+                    <li><a href="#" class="nav-link text-lg hover:text-blue-200 transition duration-300 transform hover:scale-105" data-modal-target="faq-modal">FAQ</a></li>
+                    <li><a href="#" class="nav-link text-lg hover:text-blue-200 transition duration-300 transform hover:scale-105" data-modal-target="contact-modal">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-blue-50 to-indigo-50 py-28 px-4 text-center border-b-4 border-indigo-200">
+        <div class="container mx-auto">
+            <h2 class="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+                Helping readers find libraries near them with one simple search.
+            </h2>
+            <p class="text-xl lg:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto">
+                Connect. Learn. Grow. 📚 Your gateway to ideas and opportunity.
+            </p>
+
+            <!-- Search Bar -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16">
+                <input type="text" id="searchInput" placeholder="Search by State, City, or ZIP code"
+                       class="p-4 w-full sm:w-96 border-2 border-indigo-300 rounded-xl focus:outline-none focus:ring-3 focus:ring-indigo-400 transition duration-300 shadow-lg text-lg bg-white bg-opacity-90">
+                <button id="searchButton"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-10 rounded-xl shadow-xl transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center text-lg">
+                    <span id="buttonText">Find My Library</span>
+                    <span id="loadingSpinner" class="hidden ml-3 animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></span>
+                </button>
+            </div>
+            <div id="searchResults" class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Search results will be displayed here -->
+                <p id="noResultsMessage" class="hidden text-gray-600 text-xl col-span-full">
+                    No libraries found matching your search. Try a US state, city, or a 5-digit zip code (e.g., "75201").
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content area for modals (not directly visible on page load) -->
+    <main class="hidden">
+        <!-- This main tag is intentionally hidden and serves as a semantic wrapper if needed,
+             but individual content sections are now within modals. -->
+    </main>
+
+    <!-- Modals for each section -->
+
+    <!-- Summary Modal -->
+    <div id="summary-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-6 z-50">
+        <div class="modal-content bg-white p-10 rounded-2xl shadow-2xl max-w-4xl w-full relative max-h-[90vh] overflow-y-auto">
+            <button class="modal-close absolute top-5 right-5 text-gray-500 hover:text-gray-800 text-3xl font-bold transition duration-300">&times;</button>
+            <h3 class="text-4xl font-extrabold text-gray-900 mb-8 border-b-4 border-indigo-500 pb-4 text-center">Summary</h3>
+            <p class="text-xl leading-relaxed text-gray-700 mb-6">
+                The **Online Library Database System (Libralinks)** is a nationwide platform designed to connect individuals with libraries across the country.
+                By providing a unified search experience through state, city, or zip code, the system enables users to quickly and accurately
+                locate nearby libraries. Its purpose is to promote **equitable access** to library services, support **lifelong learning**, and foster
+                connections between communities and their local library resources.
+            </p>
+            <h4 class="text-3xl font-bold text-gray-800 mb-4 border-b-2 border-blue-400 pb-2">Problem</h4>
+            <p class="text-xl leading-relaxed text-gray-700 mb-6">
+                Finding accurate and current information about local libraries can be surprisingly difficult. Whether you're relocating,
+                traveling, or simply seeking a digital library, you're often met with **outdated directories, broken links, or incomplete listings**—making a simple search unexpectedly frustrating.
+            </p>
+            <h4 class="text-3xl font-bold text-gray-800 mb-4 border-b-2 border-blue-400 pb-2">Solution</h4>
+            <p class="text-xl leading-relaxed text-gray-700">
+                The **Online Library Database System (OLDS)** is a centralized, cloud-based web application designed to provide users with **seamless access** to libraries across the country. It offers a streamlined,
+                location-based search interface that empowers users to find libraries by state, city, or ZIP code, making information discovery **fast, intuitive, and geographically relevant**.
+            </p>
+        </div>
+    </div>
+
+    <!-- Features Modal -->
+    <div id="features-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-6 z-50">
+        <div class="modal-content bg-white p-10 rounded-2xl shadow-2xl max-w-4xl w-full relative max-h-[90vh] overflow-y-auto">
+            <button class="modal-close absolute top-5 right-5 text-gray-500 hover:text-gray-800 text-3xl font-bold transition duration-300">&times;</button>
+            <h3 class="text-4xl font-extrabold text-gray-900 mb-8 border-b-4 border-indigo-500 pb-4 text-center">✨ Key Features</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-xl text-gray-700">
+                <div class="flex items-start bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <span class="text-indigo-600 text-3xl mr-4 mt-1">🔍</span>
+                    <div>
+                        <strong class="font-bold text-gray-800">Smart Search Filters:</strong> Browse effortlessly by state, city, or ZIP code, delivering custom results in seconds.
+                    </div>
+                </div>
+                <div class="flex items-start bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <span class="text-indigo-600 text-3xl mr-4 mt-1">➡️</span>
+                    <div>
+                        <strong class="font-bold text-gray-800">Direct Access Links:</strong> One-click links drive users straight to the library’s official site—no more frustrating detours.
+                    </div>
+                </div>
+                <div class="flex items-start bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <span class="text-indigo-600 text-3xl mr-4 mt-1">😊</span>
+                    <div>
+                        <strong class="font-bold text-gray-800">User-Friendly Interface:</strong> Responsive and intuitive design, built to be welcoming for users of every age and tech comfort level.
+                    </div>
+                </div>
+                <div class="flex items-start bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <span class="text-indigo-600 text-3xl mr-4 mt-1">☁️</span>
+                    <div>
+                        <strong class="font-bold text-gray-800">Scalable AWS‑Backed Architecture:</strong> Powered by Amazon Web Services for high uptime, fast performance, and seamless scalability.
+                    </div>
+                </div>
+                <div class="flex items-start bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <span class="text-indigo-600 text-3xl mr-4 mt-1">📱</span>
+                    <div>
+                        <strong class="font-bold text-gray-800">Device-Agnostic Experience:</strong> Fully optimized for both mobile and desktop platforms for consistent access everywhere.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Modal -->
+    <div id="team-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-6 z-50">
+        <div class="modal-content bg-white p-10 rounded-2xl shadow-2xl max-w-6xl w-full relative max-h-[90vh] overflow-y-auto">
+            <button class="modal-close absolute top-5 right-5 text-gray-500 hover:text-gray-800 text-3xl font-bold transition duration-300">&times;</button>
+            <h3 class="text-4xl font-extrabold text-gray-900 mb-8 border-b-4 border-indigo-500 pb-4 text-center">Meet the Cloud Warriors Team 🦸</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Charishma Sattaru -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Charishma Sattaru</h4>
+                    <p class="text-blue-600 font-semibold mb-3">Infrastructure Specialist & DevOps Engineer</p>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        "With over 6 years of experience managing secure and high-availability infrastructures, I focused on designing the AWS environment
+                        using EC2, RDS, S3, and IAM. I implemented automation and CI/CD pipelines with Jenkins, along with scripting for operational
+                        efficiency. My work ensured that the application was deployed securely, optimized for performance, and highly reliable."
+                    </p>
+                </div>
+                <!-- Diana Fernandes -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Diana Fernandes</h4>
+                    <p class="text-blue-600 font-semibold mb-3">Cloud Architect & Senior Database Administrator</p>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        "Diana Fernandes is a Cloud Architect and Senior Database Administrator at Libralinks with over
+                        15 years of experience in the IT Industry, specialized in cloud infrastructure (Azure, OCI),
+                        database systems (Oracle, MySQL, SQL Server, PostgreSQL, MongoDB), and automation tools
+                        like Terraform, Ansible, and Jenkins. She has a background in infrastructure-as-code (Terraform,
+                        Ansible), and software development with Java and Python. She has a proven ability to design
+                        and implement scalable cloud solutions across banking, insurance, and retail sectors."
+                    </p>
+                </div>
+                <!-- Lewis Fung -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Lewis Fung</h4>
+                    <p class="text-blue-600 font-semibold mb-3">AWS Solution Architect</p>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        "Served as the AWS solution Architect in the development at Libralinks, bringing a powerful
+                        combination of cloud expertise and Agile leadership into the team. With a strong foundation as a former Scrum Master,
+                        he effectively bridged technical architecture with team-driven development practices. His background played a key role
+                        in aligning AWS cloud infrastructure with Agile workflow, resulting in a system architecture that is secure, scalable,
+                        and flexible enough to adapt to changing project demands."
+                    </p>
+                </div>
+                <!-- Mittal Jain -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Mittal Jain</h4>
+                    <p class="text-blue-600 font-semibold mb-3">Front-End Developer & Cloud Engineer</p>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        "Mittal Jain is a Front-End Developer and Cloud Engineer at Libralinks. She specializes in
+                        building responsive, user-friendly interfaces using JavaScript, React.js, HTML, and CSS3. With
+                        a strong full stack development background, she understands how front-end and back-end
+                        systems interact. She also has hands-on AWS experience working with EC2, S3, IAM, VPCs,
+                        and serverless solutions, with a focus on clean, maintainable code, performance optimization,
+                        and scalable solutions. Mittal is passionate about learning new technologies and helping the
+                        team innovate and grow in the cloud."
+                    </p>
+                </div>
+                <!-- Sade Olotu -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Sade Olotu</h4>
+                    <p class="text-blue-600 font-semibold mb-3">Cloud Architect</p>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        "As a cloud architect at Libralinks, she is responsible for establishing the foundation of the
+                        Online Library Database System, designing a secure, reliable, and scalable
+                        architecture. She developed the core system that.connects users to library information,
+                        making searches fast and accurate, while also implementing processes to protect data,
+                        optimize performance, and ensure smooth operations. Her finance and administrative
+                        background strengthened her technical role, adding precision, efficiency, and
+                        organizational skills that helped deliver a practical, secure, and user-centered platform."
+                    </p>
+                </div>
+                <!-- Serenity Fox -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Serenity Fox</h4>
+                    <p class="text-blue-600 font-semibold mb-3">Project Manager</p>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        "Meet the person who brings webpages to life. With 4 years of experience as a Project Manager,
+                        they thrive on creating websites and ensuring that every project reaches its milestones without a
+                        hitch. Detail-oriented and persistent, they believe that communication is the backbone of
+                        teamwork, even if it sometimes means being a little insistent. But they are far more than a
+                        communicator; they are a true contributor, and that is the part they love most. At Libralinks they
+                        hope to continue to bring projects to those who need them."
+                    </p>
+                </div>
+                 <!-- Swati Patil -->
+                 <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Swati Patil</h4>
+                    <p class="text-blue-600 font-semibold mb-3">Java Backend Developer & Cloud Engineer</p>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        "Swati Patil serves as Java Backend Developer and Cloud Engineer at Libralinks, specializing
+                        in Spring Boot microservices and AWS cloud infrastructure. Expertise in designing scalable, resilient backend systems
+                        using Java, Spring, REST APIs, and database technologies. Proficient in leveraging AWS services like EC2, Lambda, RDS,
+                        S3, API Gateway and CI/CD pipelines (Jenkins, CodePipeline). Known for delivering high-performance, secure, and
+                        automated cloud-native solutions while collaborating effectively with cross-functional teams."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Modal -->
+    <div id="faq-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-6 z-50">
+        <div class="modal-content bg-white p-10 rounded-2xl shadow-2xl max-w-4xl w-full relative max-h-[90vh] overflow-y-auto">
+            <button class="modal-close absolute top-5 right-5 text-gray-500 hover:text-gray-800 text-3xl font-bold transition duration-300">&times;</button>
+            <h3 class="text-4xl font-extrabold text-gray-900 mb-8 border-b-4 border-indigo-500 pb-4 text-center">Frequently Asked Questions (FAQ) 🤔</h3>
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Q: How can libraries be added?</h4>
+                    <p class="text-xl text-gray-700">A: Libraries can submit requests directly through the website’s form.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Q: Is it free to use?</h4>
+                    <p class="text-xl text-gray-700">A: Yes, the service is free for everyone.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Q: Will it include eBooks or digital content?</h4>
+                    <p class="text-xl text-gray-700">A: Currently, depending upon the library you will be able to access digital content. In the future we hope to bring digital content directly in collaboration with our partners.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Q: Do I need to create an account?</h4>
+                    <p class="text-xl text-gray-700">A: No. Accounts are optional and only needed for advanced features.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Q. How do users search for and access materials?</h4>
+                    <p class="text-xl text-gray-700">A: Users access the system via a web browser or mobile app, entering keywords or filters.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-6 z-50">
+        <div class="modal-content bg-white p-10 rounded-2xl shadow-2xl max-w-xl w-full relative max-h-[90vh] overflow-y-auto">
+            <button class="modal-close absolute top-5 right-5 text-gray-500 hover:text-gray-800 text-3xl font-bold transition duration-300">&times;</button>
+            <h3 class="text-4xl font-extrabold text-gray-900 mb-8 border-b-4 border-indigo-500 pb-4 text-center">Contact Us 📞</h3>
+            <div class="text-left bg-gray-50 p-8 rounded-lg shadow-inner hover:shadow-lg transition duration-300">
+                <p class="text-xl mb-2"><strong>Project Lead:</strong> Cloud Warriors Team</p>
+                <p class="text-xl mb-2"><strong>Email:</strong> <a href="mailto:contact@libralinks.com" class="text-blue-600 hover:underline">contact@libralinks.com</a></p>
+                <p class="text-xl mb-2"><strong>Phone:</strong> (XXX) XXX-XXXX</p>
+                <p class="text-xl"><strong>Website:</strong> <a href="http://www.libralinks.com" class="text-blue-600 hover:underline" target="_blank">www.libralinks.com</a></p>
+            </div>
+            <p class="text-xl mt-8 text-center text-gray-700">
+                Libraries are more than buildings—they're gateways to ideas, learning, and opportunity.
+            </p>
+            <p class="text-xl mt-4 text-center text-gray-700">
+                Visit <a href="http://www.libralinks.com" class="text-blue-600 hover:underline font-bold" target="_blank">www.libralinks.com</a> and explore the resources, events, and services waiting for you.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white p-8 text-center text-lg">
+        <p>&copy; 2025 Libralinks by Cloud Warriors Team. All rights reserved.</p>
+    </footer>
+
+    <!-- Firebase SDK (simulated for demonstration) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let auth;
+        let db;
+        let userId = 'anonymous'; // Default to anonymous
+
+        // Function to initialize Firebase and sign in
+        async function initializeFirebaseAndAuth() {
+            try {
+                if (Object.keys(firebaseConfig).length > 0) {
+                    app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log('Signed in with custom token.');
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log('Signed in anonymously.');
+                    }
+                    userId = auth.currentUser?.uid || crypto.randomUUID();
+                    console.log('Firebase initialized. User ID:', userId);
+                } else {
+                    console.warn("Firebase config not found. Running without Firebase.");
+                }
+            } catch (error) {
+                console.error("Error initializing Firebase or signing in:", error);
+                // Fallback to anonymous if auth fails
+                auth = getAuth(); // Attempt to get auth instance without app if it failed
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+            }
+        }
+
+        // Call the initialization function
+        initializeFirebaseAndAuth();
+
+        // Get critical DOM elements once the script is parsed and executed
+        // This assumes the script is placed at the end of the body, so elements are parsed.
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const searchResultsDiv = document.getElementById('searchResults');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        // Add immediate checks for these critical elements
+        if (!searchInput || !searchButton || !buttonText || !loadingSpinner || !searchResultsDiv || !noResultsMessage) {
+            console.error("One or more critical DOM elements for search functionality were not found. Search may not work correctly.");
+            // We can choose to disable the search feature or show a more prominent user-facing error here.
+            // For now, we'll just log an error and proceed, letting subsequent null checks handle it gracefully.
+        }
+
+
+        // SIMULATED BACKEND API FOR LIBRARY SEARCH
+        async function fetchLibrariesFromApi(searchTerm) {
+            console.log(`Simulating API call for: ${searchTerm}`);
+            // In a real application, you would make a fetch call to your backend
+            // which in turn would call Google Places API or another library database.
+            // Example real API call (requires backend proxy for API key security and CORS):
+            /*
+            const apiKey = ""; // Your actual API key, securely stored on your backend
+            const apiUrl = `/api/search-libraries?query=${encodeURIComponent(searchTerm)}`;
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error(`API error: ${response.statusText}`);
+            }
+            const data = await response.json();
+            return data.libraries; // Assuming API returns { libraries: [...] }
+            */
+
+            // For this environment, we simulate the backend response based on hardcoded data
+            // and the search term.
+            await new Promise(resolve => setTimeout(resolve, 1200)); // Simulate network delay
+
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            const simulatedLibraries = [
+                // Texas
+                { id: 1, name: "Dallas Central Library", address: "1515 Young St, Dallas, TX 75201", city: "Dallas", state: "Texas", zip: "75201", url: "https://www.dallaslibrary.org/", description: "The main branch of Dallas Public Library, offering extensive collections and services." },
+                { id: 2, name: "Uptown Branch Library", address: "4724 Cole Ave, Dallas, TX 75205", city: "Dallas", state: "Texas", zip: "75205", url: "https://www.dallaslibrary.org/", description: "A vibrant branch serving the uptown community of Dallas." },
+                { id: 3, name: "J. Erik Jonsson Central Library", address: "1515 Young St, Dallas, TX 75201", city: "Dallas", state: "Texas", zip: "75201", url: "https://www.dallaslibrary.org/", description: "Dallas's flagship library, a hub for research and community." },
+                { id: 4, name: "Preston Royal Branch", address: "5626 Royal Ln, Dallas, TX 75229", city: "Dallas", state: "Texas", zip: "75229", url: "https://www.dallaslibrary.org/", description: "Community library in North Dallas." },
+                { id: 5, name: "Houston Public Library - Main Branch", address: "550 McKinney St, Houston, TX 77002", city: "Houston", state: "Texas", zip: "77002", url: "https://houstonlibrary.org/", description: "Houston's largest library with a wide range of resources." },
+                { id: 6, name: "Tanglewood Branch Library", address: "5500 Woodway Dr, Houston, TX 77056", city: "Houston", state: "Texas", zip: "77056", url: "https://houstonlibrary.org/", description: "Serving the Tanglewood area with diverse collections." },
+                { id: 7, name: "Austin Central Library", address: "710 W César Chávez St, Austin, TX 78701", city: "Austin", state: "Texas", zip: "78701", url: "https://library.austintexas.gov/", description: "A modern library known for its innovative design and technology." },
+                { id: 8, name: "Carver Branch Library", address: "1161 Angelina St, Austin, TX 78702", city: "Austin", state: "Texas", zip: "78702", url: "https://library.austintexas.gov/", description: "Historic library dedicated to African-American culture." },
+                { id: 9, name: "South Congress Branch", address: "1604 S Congress Ave, Austin, TX 78704", city: "Austin", state: "Texas", zip: "78704", url: "https://library.austintexas.gov/", description: "Popular branch in the heart of South Congress." },
+                { id: 10, name: "San Antonio Public Library - Central", address: "600 Soledad St, San Antonio, TX 78205", city: "San Antonio", state: "Texas", zip: "78205", url: "https://mysapl.org/", description: "Main branch of the San Antonio Public Library system." },
+                { id: 11, name: "Fort Worth Central Library", address: "500 W 3rd St, Fort Worth, TX 76102", city: "Fort Worth", state: "Texas", zip: "76102", url: "https://www.fortworthlibrary.org/", description: "Extensive resources and community programs in Fort Worth." },
+
+                // California
+                { id: 12, name: "Los Angeles Public Library - Central Library", address: "630 W 5th St, Los Angeles, CA 90071", city: "Los Angeles", state: "California", zip: "90071", url: "https://www.lapl.org/", description: "A historical landmark offering extensive collections and programs." },
+                { id: 13, name: "Beverly Hills Public Library", address: "444 N Rexford Dr, Beverly Hills, CA 90210", city: "Beverly Hills", state: "California", zip: "90210", url: "https://www.bhpl.org/", description: "Serving the community of Beverly Hills with a rich collection." },
+                { id: 14, name: "Santa Monica Public Library - Main", address: "601 Santa Monica Blvd, Santa Monica, CA 90401", city: "Santa Monica", state: "California", zip: "90401", url: "https://smpl.org/", description: "Coastal city library with modern amenities." },
+                { id: 15, name: "San Francisco Public Library - Main", address: "100 Larkin St, San Francisco, CA 94102", city: "San Francisco", state: "California", zip: "94102", url: "https://sfpl.org/", description: "The central hub for San Francisco's library services." },
+                { id: 16, name: "Oakland Public Library - Main", address: "125 14th St, Oakland, CA 94612", city: "Oakland", state: "California", zip: "94612", url: "https://www.oaklandlibrary.org/", description: "Serving the diverse community of Oakland." },
+                { id: 31, name: "San Diego Central Library", address: "330 Park Blvd, San Diego, CA 92101", city: "San Diego", state: "California", zip: "92101", url: "https://www.sandiego.gov/public-library", description: "A modern architectural marvel in downtown San Diego." },
+                { id: 32, name: "Pasadena Public Library - Central", address: "285 E Walnut St, Pasadena, CA 91101", city: "Pasadena", state: "California", zip: "91101", url: "https://www.cityofpasadena.net/library/", description: "The main branch of Pasadena's public library system." },
+
+
+                // New York
+                { id: 17, name: "New York Public Library - Stephen A. Schwarzman Building", address: "476 5th Ave, New York, NY 10018", city: "New York", state: "New York", zip: "10018", url: "https://www.nypl.org/", description: "An iconic research library in the heart of NYC." },
+                { id: 18, name: "Mid-Manhattan Library", address: "455 5th Ave, New York, NY 10016", city: "New York", state: "New York", zip: "10016", url: "https://www.nypl.org/", description: "NYPL's largest circulating library." },
+                { id: 19, name: "Brooklyn Public Library - Central Branch", address: "10 Grand Army Plaza, Brooklyn, NY 11238", city: "Brooklyn", state: "New York", zip: "11238", url: "https://www.bklynlibrary.org/", description: "The flagship branch of the Brooklyn Public Library system." },
+                { id: 20, name: "Queens Public Library - Central", address: "89-11 Merrick Blvd, Jamaica, NY 11432", city: "Jamaica", state: "New York", zip: "11432", url: "https://www.queenslibrary.org/", description: "Main branch of the Queens Public Library." },
+
+                // Illinois
+                { id: 21, name: "Chicago Public Library - Harold Washington", address: "400 S State St, Chicago, IL 60605", city: "Chicago", state: "Illinois", zip: "60605", url: "https://www.chipublib.org/", description: "The largest public library in the world." },
+                { id: 22, name: "Lincoln Park Branch", address: "959 W Fullerton Ave, Chicago, IL 60614", city: "Chicago", state: "Illinois", zip: "60614", url: "https://www.chipublib.org/", description: "A popular branch in the Lincoln Park neighborhood." },
+
+                // Washington
+                { id: 23, name: "Seattle Public Library - Central Library", address: "1000 4th Ave, Seattle, WA 98104", city: "Seattle", state: "Washington", zip: "98104", url: "https://www.spl.org/", description: "Known for its unique architecture and extensive digital resources." },
+
+                // Massachusetts
+                { id: 24, name: "Boston Public Library - Central", address: "700 Boylston St, Boston, MA 02116", city: "Boston", state: "Massachusetts", zip: "02116", url: "https://www.bpl.org/", description: "A grand and historic library with impressive collections." },
+
+                // Colorado
+                { id: 25, name: "Denver Public Library - Central", address: "10 W 14th Ave Pkwy, Denver, CO 80204", city: "Denver", state: "Colorado", zip: "80204", url: "https://www.denverlibrary.org/", description: "A hub for learning and community engagement in Denver." },
+
+                // Florida
+                { id: 26, name: "Miami-Dade Public Library - Main", address: "101 W Flagler St, Miami, FL 33130", city: "Miami", state: "Florida", zip: "33130", url: "https://www.mdpls.org/", description: "Serving the diverse communities of Miami-Dade County." },
+                { id: 27, name: "Coral Gables Branch Library", address: "3443 Segovia St, Coral Gables, FL 33134", city: "Coral Gables", state: "Florida", zip: "33134", url: "https://www.coralgables.com/library", description: "A charming library in the heart of Coral Gables." },
+
+                // Pennsylvania
+                { id: 28, name: "Philadelphia Free Library - Parkway Central", address: "1901 Vine St, Philadelphia, PA 19103", city: "Philadelphia", state: "Pennsylvania", zip: "19103", url: "https://libwww.freelibrary.org/", description: "The largest library in the Free Library of Philadelphia system." },
+
+                // Arizona
+                { id: 29, name: "Phoenix Public Library - Burton Barr Central", address: "1221 N Central Ave, Phoenix, AZ 85004", city: "Phoenix", state: "Arizona", zip: "85004", url: "https://www.phoenixpubliclibrary.org/", description: "Modern library facility with extensive resources in downtown Phoenix." },
+                { id: 30, name: "Tempe Public Library", address: "3500 S Rural Rd, Tempe, AZ 85282", city: "Tempe", state: "Arizona", zip: "85282", url: "https://www.tempepubliclibrary.org/", description: "Serving the community of Tempe with various programs." }
+            ];
+
+            const filteredLibraries = simulatedLibraries.filter(library =>
+                library.state.toLowerCase().includes(lowerCaseSearchTerm) ||
+                library.city.toLowerCase().includes(lowerCaseSearchTerm) ||
+                library.zip.includes(lowerCaseSearchTerm) ||
+                library.address.toLowerCase().includes(lowerCaseSearchTerm)
+            );
+            return filteredLibraries;
+        }
+
+
+        // Function to display library results
+        function displayLibraries(filteredLibraries) {
+            // Now using the globally declared constants, which were checked once.
+            if (!searchResultsDiv || !noResultsMessage) {
+                console.error("Cannot display libraries: Required DOM elements are missing (checked globally).");
+                return;
+            }
+
+            searchResultsDiv.innerHTML = ''; // Clear previous results
+
+            if (filteredLibraries.length === 0) {
+                noResultsMessage.classList.remove('hidden');
+            } else {
+                noResultsMessage.classList.add('hidden');
+                filteredLibraries.forEach(library => {
+                    const libraryCard = `
+                        <div class="bg-white p-6 rounded-lg shadow-md flex flex-col justify-between border border-gray-100 transition duration-300 hover:shadow-lg">
+                            <div>
+                                <h4 class="text-2xl font-bold text-gray-900 mb-2">${library.name}</h4>
+                                <p class="text-gray-600 mb-1">Address: ${library.address}</p>
+                                <p class="text-gray-500 text-sm mt-2">${library.description}</p>
+                            </div>
+                            <a href="${library.url}" target="_blank" class="mt-4 text-blue-600 hover:underline inline-flex items-center self-start font-medium transition duration-300 hover:text-blue-800">
+                                Visit Library Website
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        </div>
+                    `;
+                    searchResultsDiv.innerHTML += libraryCard;
+                });
+            }
+        }
+
+        // Search functionality - now fetches from simulated API
+        // Using the globally declared `searchButton`
+        if (searchButton) { // Only add listener if button exists
+            searchButton.addEventListener('click', async () => {
+                // Using the globally declared constants
+                if (!searchInput || !buttonText || !loadingSpinner || !searchResultsDiv || !noResultsMessage) {
+                    console.error("Required DOM elements for search interaction not found during click event.");
+                    return;
+                }
+
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                if (!searchTerm) {
+                    displayLibraries([]); // Clear results if search term is empty
+                    return;
+                }
+
+                // Show loading state
+                buttonText.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+                searchInput.disabled = true;
+
+                try {
+                    // Call the simulated API
+                    const results = await fetchLibrariesFromApi(searchTerm);
+                    displayLibraries(results);
+                } catch (error) {
+                    console.error("Failed to fetch libraries:", error);
+                    if (searchResultsDiv) {
+                        searchResultsDiv.innerHTML = `<p class="text-red-500 text-xl col-span-full">Error: Could not fetch libraries. Please try again.</p>`;
+                    }
+                } finally {
+                    // Hide loading state
+                    buttonText.classList.remove('hidden');
+                    loadingSpinner.classList.add('hidden');
+                    searchInput.disabled = false;
+                }
+            });
+        } else {
+            console.error("Search button not found, search functionality disabled.");
+        }
+
+
+        // Initial display (show some default libraries or nothing)
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure searchResultsDiv and noResultsMessage are available before calling displayLibraries
+            if (searchResultsDiv && noResultsMessage) {
+                 displayLibraries([]); // Initially show no results
+            }
+            setupModals(); // Initialize modal functionality for all modals
+        });
+
+        // --- Modal Functionality ---
+        function setupModals() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const modals = document.querySelectorAll('.modal');
+            const closeButtons = document.querySelectorAll('.modal-close');
+
+            // Open modal when navigation link is clicked
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault(); // Prevent default scroll/navigation
+                    const targetModalId = link.dataset.modalTarget;
+                    const targetModal = document.getElementById(targetModalId);
+                    if (targetModal) {
+                        targetModal.classList.add('is-active');
+                        document.body.style.overflow = 'hidden'; // Prevent scrolling body when modal is open
+                    }
+                });
+            });
+
+            // Close modal when close button is clicked
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const modal = button.closest('.modal');
+                    if (modal) {
+                        modal.classList.remove('is-active');
+                        document.body.style.overflow = ''; // Restore body scrolling
+                    }
+                });
+            });
+
+            // Close modal when clicking outside the content area
+            modals.forEach(modal => {
+                modal.addEventListener('click', (event) => {
+                    // Only close if click is directly on the modal backdrop, not on the modal content
+                    if (event.target === modal) {
+                        modal.classList.remove('is-active');
+                        document.body.style.overflow = ''; // Restore body scrolling
+                    }
+                });
+            });
+
+            // Close modal on Escape key press
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    modals.forEach(modal => {
+                        if (modal.classList.contains('is-active')) {
+                            modal.classList.remove('is-active');
+                            document.body.style.overflow = ''; // Restore body scrolling
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
